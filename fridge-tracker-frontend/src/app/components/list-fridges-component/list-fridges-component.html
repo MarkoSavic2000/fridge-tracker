@@ -1,0 +1,84 @@
+<h3>Create New Fridge</h3>
+
+<div>
+  <input
+    type="text"
+    placeholder="Fridge name"
+    [(ngModel)]="newFridgeName"
+  />
+  <button (click)="createFridge()">Create</button>
+</div>
+
+<!-- Success message -->
+<div *ngIf="creationSuccess === true" style="color: green; margin-top: 8px;">
+  Fridge created successfully.
+</div>
+
+<!-- Error messages -->
+<div *ngIf="errorMessages.length > 0" style="color: red; margin-top: 8px;">
+  <div *ngFor="let msg of errorMessages">
+    {{ msg }}
+  </div>
+</div>
+
+<hr>
+
+<!-- Delete success -->
+<div *ngIf="deleteSuccess === true" style="color: green; margin-bottom: 8px;">
+    Fridge deleted successfully.
+  </div>
+  
+  <!-- Delete errors -->
+  <div *ngIf="deleteErrorMessages.length > 0" style="color: red; margin-bottom: 8px;">
+    <div *ngFor="let msg of deleteErrorMessages">{{ msg }}</div>
+  </div>
+
+<h2>Your Fridges</h2>
+
+<!-- 🔍 Search input -->
+<div style="margin-bottom: 16px;">
+  <input
+    type="text"
+    placeholder="Search by name"
+    [(ngModel)]="filterName"
+    (ngModelChange)="applyFilter()"
+  />
+</div>
+
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th (click)="changeSort('name')" style="cursor: pointer;">
+        Name
+        <span *ngIf="sortField === 'name'">
+          {{ sortDirection === 'asc' ? '▲' : '▼' }}
+        </span>
+      </th>
+
+      <th (click)="changeSort('createdOn')" style="cursor: pointer;">
+        Created On
+        <span *ngIf="sortField === 'createdOn'">
+          {{ sortDirection === 'asc' ? '▲' : '▼' }}
+        </span>
+      </th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let f of fridges">
+      <td>{{ f.name }}</td>
+      <td>{{ f.createdOn | date:'yyyy-MM-dd HH:mm' }}</td>
+      <td>
+        <button (click)="viewItems(f.id)">Items</button>
+        <button (click)="viewRecipes(f.id)">Recipes</button>
+        <button (click)="deleteFridge(f.id, f.name)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 20px;">
+  <button (click)="previousPage()" [disabled]="page === 0">Previous</button>
+  <span> Page {{ page + 1 }} of {{ totalPages }} </span>
+  <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Next</button>
+</div>

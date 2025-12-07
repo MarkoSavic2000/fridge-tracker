@@ -1,0 +1,150 @@
+<h3>Add New Item</h3>
+
+<div style="margin-bottom: 20px; border: 1px solid #ccc; padding: 12px;">
+
+  <div>
+    <label>Name *</label><br>
+    <input type="text" [(ngModel)]="newItem.name">
+  </div>
+
+  <div>
+    <label>Quantity *</label><br>
+    <input type="number" [(ngModel)]="newItem.quantity">
+  </div>
+
+  <div>
+    <label>Measurement Unit *</label><br>
+    <input type="text" [(ngModel)]="newItem.measurementUnit" placeholder="e.g. g, ml, pcs">
+  </div>
+
+  <div>
+    <label>Category *</label><br>
+    <select [(ngModel)]="newItem.category">
+      <option value="">Select category</option>
+      <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Stored On *</label><br>
+    <input type="datetime-local" [(ngModel)]="newItem.storedOn">
+  </div>
+
+  <div>
+    <label>Expires On *</label><br>
+    <input type="date" [(ngModel)]="newItem.expiresOn">
+  </div>
+
+  <div>
+    <label>Note</label><br>
+    <textarea [(ngModel)]="newItem.note"></textarea>
+  </div>
+
+  <button (click)="addItem()">Add Item</button>
+
+  <!-- Success -->
+  <div *ngIf="addSuccess === true" style="color: green; margin-top: 10px;">
+    Item added successfully.
+  </div>
+
+  <!-- Errors -->
+  <div *ngIf="addErrorMessages.length > 0" style="color: red; margin-top: 10px;">
+    <div *ngFor="let msg of addErrorMessages">
+      {{ msg }}
+    </div>
+  </div>
+
+</div>
+
+<hr>
+
+<h2>Fridge Items</h2>
+
+<!-- Delete success -->
+<div *ngIf="deleteSuccess === true" style="color: green; margin-bottom: 8px;">
+    Item deleted successfully.
+  </div>
+  
+<!-- Delete errors -->
+<div *ngIf="deleteErrorMessages.length > 0" style="color: red; margin-bottom: 8px;">
+<div *ngFor="let msg of deleteErrorMessages">{{ msg }}</div>
+</div>
+  
+<div *ngIf="takeSuccess === true" style="color: green; margin-bottom: 8px;">
+    Item taken from fridge successfully.
+  </div>
+  
+<div *ngIf="takeErrorMessages.length > 0" style="color: red; margin-bottom: 8px;">
+<div *ngFor="let msg of takeErrorMessages">
+    {{ msg }}
+</div>
+</div>
+  
+
+<div>
+  <input placeholder="Name" [(ngModel)]="nameFilter" (ngModelChange)="applyFilters()" />
+
+  <input placeholder="Category" [(ngModel)]="categoryFilter" (ngModelChange)="applyFilters()" />
+
+  <label>Stored From:</label>
+  <input type="date" [(ngModel)]="storedOnFrom" (change)="applyFilters()" />
+
+  <label>Stored To:</label>
+  <input type="date" [(ngModel)]="storedOnTo" (change)="applyFilters()" />
+
+  <label>Expires From:</label>
+  <input type="date" [(ngModel)]="expiresOnFrom" (change)="applyFilters()" />
+
+  <label>Expires To:</label>
+  <input type="date" [(ngModel)]="expiresOnTo" (change)="applyFilters()" />
+
+  <label>
+    <input type="checkbox" [(ngModel)]="onlyExpired" (change)="applyFilters()" />
+    Only Expired
+  </label>
+</div>
+
+<br>
+
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th (click)="changeSort('name')">Name</th>
+      <th (click)="changeSort('quantity')">Quantity</th>
+      <th (click)="changeSort('measurementUnit')">Unit</th>
+      <th (click)="changeSort('category')">Category</th>
+      <th (click)="changeSort('storedOn')">Stored On</th>
+      <th (click)="changeSort('expiresOn')">Expires On</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let i of items">
+      <td>{{ i.name }}</td>
+      <td>{{ i.quantity }}</td>
+      <td>{{ i.measurementUnit }}</td>
+      <td>{{ i.category }}</td>
+      <td>{{ i.storedOn | date: 'yyyy-MM-dd' }}</td>
+      <td>{{ i.expiresOn | date: 'yyyy-MM-dd' }}</td>
+      <td>{{ i.note }}</td>
+      <td>
+        <input 
+          type="number"
+          placeholder="quantity"
+          [(ngModel)]="takeAmount[i.id]"
+          style="width: 70px;"
+        />
+        <button (click)="takeItem(i.id, i.name)">Take</button>
+      </td>
+      <td>
+        <button (click)="deleteItem(i.id, i.name)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div>
+  <button (click)="previousPage()" [disabled]="page===0">Previous</button>
+  <span> Page {{ page + 1 }} of {{ totalPages }} </span>
+  <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Next</button>
+</div>

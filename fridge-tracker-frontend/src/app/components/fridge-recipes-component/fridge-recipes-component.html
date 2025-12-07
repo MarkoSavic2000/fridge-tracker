@@ -1,0 +1,45 @@
+<h2>Recipes for Your Fridge</h2>
+
+<div *ngIf="loading">Loading recipes...</div>
+
+<div *ngIf="errorMessages.length > 0" style="color:red;">
+  <div *ngFor="let msg of errorMessages">{{ msg }}</div>
+</div>
+
+<div *ngIf="recipes.length > 0">
+
+  <div *ngFor="let r of recipes" style="border:1px solid #ccc; padding:16px; margin-bottom:20px; border-radius:8px;">
+
+    <h3>{{ r.title }}</h3>
+
+    <img *ngIf="r.image"
+         [src]="r.image"
+         alt="Recipe Image"
+         style="width:200px; border-radius:6px; margin-bottom:12px;">
+
+    <div>
+      <strong>Ingredients you have:</strong>
+      <ul>
+        <li *ngFor="let ing of r.presentIngredients">
+          {{ ing.ingredient }}
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <strong>Ingredients missing:</strong>
+      <ul>
+        <li *ngFor="let ing of r.missingIngredients">
+          {{ ing.ingredient }}
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- No recipes -->
+<div *ngIf="!loading && recipes.length === 0 && errorMessages.length === 0">
+  No recipes found for this fridge.
+</div>

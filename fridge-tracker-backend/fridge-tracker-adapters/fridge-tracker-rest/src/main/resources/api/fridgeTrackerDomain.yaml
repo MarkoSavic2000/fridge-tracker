@@ -1,0 +1,304 @@
+openapi: 3.0.3
+info:
+  title: Smart cemetery domain
+  description: Requests and responses for API
+  version: ${revision}
+
+components:
+  schemas:
+    ResultResponse:
+      type: object
+      nullable: false
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Contains true if operation is successfully performed, otherwise false
+
+    ErrorResponse:
+      type: object
+      description: Represents a standard error response containing details about errors or issues encountered during an operation
+      properties:
+        messages:
+          type: array
+          description: A list of messages providing additional context or details about the error
+          items:
+            $ref: '#/components/schemas/MessageApi'
+
+    MessageApi:
+      type: object
+      description: Represents a message with additional information related to an operation's result
+      properties:
+        global:
+          type: boolean
+          description: Indicates whether the message is global or specific to a reference
+        reference:
+          type: string
+          description: A specific reference related to the message (e.g., a field name)
+        label:
+          type: string
+          description: The text or label of the message
+
+    FridgeDetailsApi:
+      type: object
+      required:
+        - id
+        - name
+        - createdOn
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+
+    FridgePage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/FridgeDetailsApi'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    FridgeItemDetailsApi:
+      type: object
+      required:
+        - id
+        - name
+        - createdOn
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        quantity:
+          type: number
+          format: decimal
+        measurementUnit:
+          type: string
+        category:
+          $ref: '#/components/schemas/FridgeItemCategoryEnumApi'
+        storedOn:
+          type: string
+          format: date-time
+        expiresOn:
+          type: string
+          format: date-time
+        note:
+          type: string
+
+    FridgeItemPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/FridgeItemDetailsApi'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    IngredientInfoApi:
+      type: object
+      properties:
+        ingredient:
+          type: string
+
+    RecipeApi:
+      type: object
+      properties:
+        title:
+          type: string
+        image:
+          type: string
+        missingIngredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientInfoApi'
+        presentIngredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientInfoApi'
+
+    GetRecipesResponse:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeApi'
+
+    FridgeItemCategoryEnumApi:
+      type: string
+      enum:
+        - DAIRY
+        - MEAT
+        - FISH
+        - VEGETABLES
+        - FRUITS
+        - BEVERAGES
+        - BAKERY
+        - FROZEN
+        - CONDIMENTS
+        - SNACKS
+        - HERBS_SPICES
+        - READY_MEALS
+        - OTHER
+
+
+  requestBodies:
+    CreateFridgeRequest:
+      required: true
+      description: Fridge details
+      content:
+        application/json:
+          schema:
+            required:
+              - name
+            type: object
+            properties:
+              name:
+                type: string
+                minLength: 1
+
+    TakeFridgeItemRequest:
+      required: true
+      description: Quantity of item which should be taken
+      content:
+        application/json:
+          schema:
+            required:
+              - quantity
+            type: object
+            properties:
+              quantity:
+                type: number
+                format: decimal
+                exclusiveMinimum: 0
+
+    AddFridgeItemRequest:
+      required: true
+      description: Fridge item details
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - quantity
+              - measurementUnit
+              - category
+              - storedOn
+              - expiresOn
+            properties:
+              name:
+                type: string
+                minLength: 1
+              quantity:
+                type: number
+                format: decimal
+              measurementUnit:
+                type: string
+                minLength: 1
+              category:
+                $ref: '#/components/schemas/FridgeItemCategoryEnumApi'
+              storedOn:
+                type: string
+                format: date-time
+              expiresOn:
+                type: string
+                format: date
+              note:
+                type: string
+
+  responses:
+    CreateFridgeResponse:
+      description: Contains flag that indicates if fridge is created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultResponse'
+
+    DeleteFridgeResponse:
+      description: Contains flag that indicates if fridge is deleted successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultResponse'
+
+    ListFridgesResponse:
+      description: Paginated list of fridges
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FridgePage'
+
+    AddFridgeItemResponse:
+      description: Contains flag that indicates if fridge item is added successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultResponse'
+
+    DeleteFridgeItemResponse:
+      description: Contains flag that indicates if fridge is deleted successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultResponse'
+
+    TakeFridgeItemResponse:
+      description: Contains flag that indicates if fridge is deleted successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultResponse'
+
+    ListFridgeItemsResponse:
+      description: Paginated list of fridge items
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FridgeItemPage'
+
+    GetRecipesResponse:
+      description: List of recipes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetRecipesResponse'
+
+    ErrorResponse:
+      description: Represents a standard error response containing details about errors or issues encountered during an operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

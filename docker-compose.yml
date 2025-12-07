@@ -1,0 +1,103 @@
+services:
+  db:
+    image: postgres:15
+    container_name: fridge-tracker-db
+    environment:
+      POSTGRES_DB: fridge_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak-db:
+    image: postgres:15
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+    volumes:
+      - keycloak-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: fridge-tracker-keycloak
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HEALTH_ENABLED: true
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak_db
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev --import-realm
+    volumes:
+      - ./realm-settings.json:/opt/keycloak/data/import/realm-settings.json:ro
+      - keycloak-data:/opt/keycloak/data
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "timeout 3s bash -c '</dev/tcp/localhost/9000' || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+
+  app:
+    build:
+      context: ./fridge-tracker-backend
+      dockerfile: Dockerfile
+    container_name: fridge-tracker-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/fridge_tracker
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      KEYCLOAK_ISSUER_URI: http://localhost:8080/realms/fridge_tracker
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/fridge_tracker/protocol/openid-connect/certs
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./fridge-tracker-frontend
+      dockerfile: Dockerfile
+    container_name: fridge-tracker-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      app:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  keycloak-postgres:
+  keycloak-data:

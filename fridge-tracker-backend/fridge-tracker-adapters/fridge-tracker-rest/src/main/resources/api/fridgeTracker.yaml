@@ -1,0 +1,282 @@
+openapi: 3.0.3
+info:
+  title: Smart Cemetery API
+  description: Smart Cemetery API definition
+  version: ${revision}
+
+tags:
+  - name: Fridge
+    description: Contains all fridge endpoints
+  - name: FridgeItem
+    description: Contains all fridge item endpoints
+  - name: Recipe
+    description: Contains all recipe endpoints
+
+paths:
+  /api/fridges:
+    post:
+      tags:
+        - Fridge
+      operationId: createFridge
+      summary: Creates a new fridge
+      requestBody:
+        $ref: 'fridgeTrackerDomain.yaml#/components/requestBodies/CreateFridgeRequest'
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/CreateFridgeResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+    get:
+      tags:
+        - Fridge
+      operationId: listFridges
+      summary: Retrieves a paginated list of fridges for the current user
+      parameters:
+        - name: page
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: sort
+          in: query
+          description: Sorting criteria in the format `property-(asc|desc)`.
+            Can be repeated for multiple sort fields, e.g., `sort=name-asc&sort=createdOn-desc`.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: name
+          in: query
+          description: Optional filter - fridge name contains this value (case-insensitive)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ListFridgesResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+  /api/fridges/{id}:
+    delete:
+      tags:
+        - Fridge
+      operationId: deleteFridge
+      summary: Deletes a fridge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the fridge that should be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/DeleteFridgeResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+  /api/fridges/{fridgeId}/items:
+    post:
+      tags:
+        - FridgeItem
+      operationId: addFridgeItem
+      summary: Adds a new item to the fridge
+      parameters:
+        - name: fridgeId
+          in: path
+          required: true
+          description: Unique identifier of the fridge in which item should be added
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        $ref: 'fridgeTrackerDomain.yaml#/components/requestBodies/AddFridgeItemRequest'
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/AddFridgeItemResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+  /api/fridge-items/{id}:
+    delete:
+      tags:
+        - FridgeItem
+      operationId: deleteFridgeItem
+      summary: Deletes fridge item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the fridge item which should be deleted
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/DeleteFridgeItemResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+  /api/fridge-items/{id}/take:
+    patch:
+      tags:
+        - FridgeItem
+      operationId: takeFridgeItem
+      summary: Takes item from the fridge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the fridge item which should be taken
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        $ref: 'fridgeTrackerDomain.yaml#/components/requestBodies/TakeFridgeItemRequest'
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/TakeFridgeItemResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+  /api/fridges/{id}/items:
+    get:
+      tags:
+        - FridgeItem
+      operationId: listFridgeItems
+      summary: Retrieves a paginated list of fridges items for the specified fridge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the fridge which items should be listed
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: sort
+          in: query
+          description: Sorting criteria in the format `property-(asc|desc)`.
+            Can be repeated for multiple sort fields, e.g., `sort=name-asc&sort=storedOn-desc`.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: name
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            $ref: 'fridgeTrackerDomain.yaml#/components/schemas/FridgeItemCategoryEnumApi'
+        - name: storedOnFrom
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: storedOnTo
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: expiresOnFrom
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: expiresOnTo
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: onlyExpired
+          in: query
+          description: Optional filter
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ListFridgeItemsResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+
+  /api/fridges/{fridgeId}/recipes:
+    get:
+      tags:
+        - Recipe
+      operationId: getRecipes
+      summary: Generates recipes based on items in the fridge.
+      parameters:
+        - name: fridgeId
+          in: path
+          required: true
+          description: Unique identifier of the fridge which items should be used in recipes
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/GetRecipesResponse'
+        '4XX':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'
+        '500':
+          $ref: 'fridgeTrackerDomain.yaml#/components/responses/ErrorResponse'

@@ -1,0 +1,51 @@
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  jpa:
+    defer-datasource-initialization: false
+    open-in-view: false
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: none
+
+  flyway:
+    encoding: UTF-8
+    locations: classpath:database/migrations
+    baseline-on-migrate: true
+    out-of-order: false
+    enabled: true
+
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+cors:
+  allowed-origins:
+    - "http://localhost:4200"
+
+spoonacular:
+  base-url: https://api.spoonacular.com
+  api-key: 7bf306ba49074f4ca4dcdbd9e9c94a85
+  response-timeout-seconds: 10
+  connection-timeout-millis: 5000

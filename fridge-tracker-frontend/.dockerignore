@@ -1,0 +1,13 @@
+# Angular
+node_modules/
+dist/
+.angular/
+.tmp/
+
+# IDE
+.idea/
+.vscode/
+
+# Git
+.git/
+.gitignore
